@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
   int fd = open(argv[1], O_RDONLY);
   if (fd == -1) {
     perror("open");
-    return -1;
+    exit(EXIT_FAILURE);
   }
   while ((readed = read(fd, buffer, BUF_SIZE)) > 0) {
     printf("%.*s", (int)readed, buffer);
@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
 exit:
   if (close(fd) == -1) {
     perror("close");
-    return -1;
+    exit(EXIT_FAILURE);
   }
-  return 0;
+  exit(EXIT_SUCCESS);
 }
