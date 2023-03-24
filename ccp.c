@@ -7,7 +7,16 @@
 #define BUF_SIZE 1024
 #endif
 
+static void usage() {
+  printf("ccp <file>\n");
+  // printf("ccp <file> <server-ip> <port>\n");
+}
+
 int main(int argc, char *argv[]) {
+  if (argc != 2) {
+    usage();
+    exit(EXIT_FAILURE);
+  }
   char buffer[BUF_SIZE];
   ssize_t readed;
   int fd = open(argv[1], O_RDONLY);
