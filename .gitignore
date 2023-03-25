@@ -1,1 +1,6 @@
 ccp
+lib.o
+server.o
+client.o
+ccp.o
+.cache/clangd/index
