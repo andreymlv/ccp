@@ -1,0 +1,70 @@
+[
+  {
+    "arguments": [
+      "/sbin/cc",
+      "-c",
+      "-g",
+      "-std=c99",
+      "-Wall",
+      "-O0",
+      "-D_DEFAULT_SOURCE",
+      "-D_BSD_SOURCE",
+      "-D_XOPEN_SOURCE=700L",
+      "-DVERSION=\"0.1\"",
+      "ccp.c"
+    ],
+    "directory": "/home/andreymlv/Source/ccp",
+    "file": "/home/andreymlv/Source/ccp/ccp.c"
+  },
+  {
+    "arguments": [
+      "/sbin/cc",
+      "-c",
+      "-g",
+      "-std=c99",
+      "-Wall",
+      "-O0",
+      "-D_DEFAULT_SOURCE",
+      "-D_BSD_SOURCE",
+      "-D_XOPEN_SOURCE=700L",
+      "-DVERSION=\"0.1\"",
+      "server.c"
+    ],
+    "directory": "/home/andreymlv/Source/ccp",
+    "file": "/home/andreymlv/Source/ccp/server.c"
+  },
+  {
+    "arguments": [
+      "/sbin/cc",
+      "-c",
+      "-g",
+      "-std=c99",
+      "-Wall",
+      "-O0",
+      "-D_DEFAULT_SOURCE",
+      "-D_BSD_SOURCE",
+      "-D_XOPEN_SOURCE=700L",
+      "-DVERSION=\"0.1\"",
+      "client.c"
+    ],
+    "directory": "/home/andreymlv/Source/ccp",
+    "file": "/home/andreymlv/Source/ccp/client.c"
+  },
+  {
+    "arguments": [
+      "/sbin/cc",
+      "-c",
+      "-g",
+      "-std=c99",
+      "-Wall",
+      "-O0",
+      "-D_DEFAULT_SOURCE",
+      "-D_BSD_SOURCE",
+      "-D_XOPEN_SOURCE=700L",
+      "-DVERSION=\"0.1\"",
+      "lib.c"
+    ],
+    "directory": "/home/andreymlv/Source/ccp",
+    "file": "/home/andreymlv/Source/ccp/lib.c"
+  }
+]
