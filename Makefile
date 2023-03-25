@@ -1,3 +1,3 @@
 ccp: ccp.c
-	cc ccp.c -o ccp
+	cc ccp.c -o ccp -lz
 
