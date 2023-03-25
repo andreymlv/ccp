@@ -1,0 +1,9 @@
+# ccp (Work In Progress)
+
+## Quick Start
+
+```console
+git clone https://github.com/andreymlv/ccp.git
+cd ccp
+make
+```
