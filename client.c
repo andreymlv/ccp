@@ -41,7 +41,7 @@ void free_client(client *client) {
 }
 
 void open_read_send_client(client *client) {
-  int sockfd, numbytes;
+  int sockfd;
   char buf[BUF_SIZE];
   struct addrinfo hints, *servinfo, *p;
   int rv;
