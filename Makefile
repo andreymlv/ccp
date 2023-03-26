@@ -6,8 +6,8 @@ LIBS = -lz
 
 # flags
 CPPFLAGS = -D_DEFAULT_SOURCE -D_BSD_SOURCE -D_XOPEN_SOURCE=700L -DVERSION=\"${VERSION}\"
-CFLAGS   = -g -std=c99 -Wall -O0 ${CPPFLAGS}
-# CFLAGS   = -std=c99 -pedantic -Wall -Wno-deprecated-declarations -Os ${CPPFLAGS}
+# CFLAGS   = -g -std=c99 -Wall -O0 ${CPPFLAGS}
+CFLAGS   = -std=c99 -pedantic -Wall -Wno-deprecated-declarations -Os ${CPPFLAGS}
 LDFLAGS  = ${LIBS}
 
 # Solaris
