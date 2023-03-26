@@ -2,12 +2,14 @@
 #include "lib.h"
 
 #include <arpa/inet.h>
+#include <assert.h>
 #include <fcntl.h>
 #include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <zlib.h>
 
 void init_client(client *client, const char *file, const char *ip,
                  const char *port) {
@@ -42,11 +44,9 @@ void free_client(client *client) {
 
 void open_read_send_client(client *client) {
   int sockfd;
-  char buf[BUF_SIZE];
   struct addrinfo hints, *servinfo, *p;
   int rv;
   char s[INET6_ADDRSTRLEN];
-  ssize_t readed;
 
   memset(&hints, 0, sizeof hints);
   hints.ai_family = AF_UNSPEC;
@@ -91,26 +91,53 @@ void open_read_send_client(client *client) {
 
   printf("Sending %s\n", client->file);
 
-  while ((readed = read(client->fd, buf, BUF_SIZE)) > 0) {
-    ssize_t sended;
-    // TODO: is there bug?
-    while ((sended = send(sockfd, buf, readed, 0)) < readed) {
-      readed -= sended;
-    }
-    if (sended == -1) {
-      perror("send");
-    }
+  int ret, flush;
+  unsigned have;
+  z_stream strm;
+  unsigned char in[BUF_SIZE];
+  unsigned char out[BUF_SIZE];
 
-    // printf("\n\n\n=====\n\nsended %ld and readed %ld\n\n\n=====\n\n",
-    // sended,
-    //        readed);
+  /* allocate deflate state */
+  strm.zalloc = Z_NULL;
+  strm.zfree = Z_NULL;
+  strm.opaque = Z_NULL;
+  ret = deflateInit(&strm, Z_DEFAULT_COMPRESSION);
+  if (ret != Z_OK) {
+    perror("deflateInit");
+  }
 
-    printf("%.*s", (int)readed, buf);
-  }
-  if (readed == -1) {
-    perror("read");
-    goto exit;
-  }
+  /* compress until end of file */
+  do {
+    strm.avail_in = read(client->fd, in, BUF_SIZE);
+    if (strm.avail_in == -1) {
+      perror("read");
+      goto exit;
+    }
+    flush = strm.avail_in == 0 ? Z_FINISH : Z_NO_FLUSH;
+    strm.next_in = in;
+
+    /* run deflate() on input until output buffer not full, finish
+       compression if all of source has been read in */
+    do {
+      strm.avail_out = BUF_SIZE;
+      strm.next_out = out;
+      ret = deflate(&strm, flush);   /* no bad return value */
+      assert(ret != Z_STREAM_ERROR); /* state not clobbered */
+      have = BUF_SIZE - strm.avail_out;
+      ssize_t sended;
+      while ((sended = send(sockfd, out, have, 0)) < have) {
+        have -= sended;
+      }
+      printf("sended %ld bytes.\n", sended);
+    } while (strm.avail_out == 0);
+    assert(strm.avail_in == 0); /* all input will be used */
+
+    /* done when last data in file processed */
+  } while (flush != Z_FINISH);
+  assert(ret == Z_STREAM_END); /* stream will be complete */
+
+  /* clean up and return */
+  (void)deflateEnd(&strm);
 
 exit:
   close(sockfd);

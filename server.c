@@ -2,12 +2,14 @@
 #include "lib.h"
 
 #include <arpa/inet.h>
+#include <assert.h>
 #include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <zlib.h>
 
 void init_server(server *server, const char *port) {
   server->port = calloc(strlen(port) + 1, sizeof(char));
@@ -21,7 +23,7 @@ void init_server(server *server, const char *port) {
 void free_server(server *server) { free(server->port); }
 
 void recv_server(server *server) {
-  int sockfd, new_fd; // listen on sock_fd, new connection on new_fd
+  int sockfd = -1, new_fd = -1; // listen on sock_fd, new connection on new_fd
   struct addrinfo hints, *servinfo, *p;
   struct sockaddr_storage their_addr; // connector's address information
   socklen_t sin_size;
@@ -97,14 +99,54 @@ void recv_server(server *server) {
 
     if (!fork()) {   // this is the child process
       close(sockfd); // child doesn't need the listener
-      char buf[BUF_SIZE];
-      ssize_t numbytes;
-      while ((numbytes = recv(new_fd, buf, BUF_SIZE, 0)) > 0) {
-        printf("%.*s", (int)numbytes, buf);
+
+      int ret;
+      unsigned have;
+      z_stream strm;
+      unsigned char in[BUF_SIZE];
+      unsigned char out[BUF_SIZE];
+
+      /* allocate inflate state */
+      strm.zalloc = Z_NULL;
+      strm.zfree = Z_NULL;
+      strm.opaque = Z_NULL;
+      strm.avail_in = 0;
+      strm.next_in = Z_NULL;
+      ret = inflateInit(&strm);
+      if (ret != Z_OK) {
+        perror("inflateInit");
       }
-      if (numbytes == -1) {
-        perror("recv");
-      }
+
+      do {
+        strm.avail_in = recv(new_fd, in, BUF_SIZE, 0);
+        if (strm.avail_in == 0 || strm.avail_in == -1) {
+          perror("recv");
+          break;
+        }
+        strm.next_in = in;
+
+        /* run inflate() on input until output buffer not full */
+        do {
+          strm.avail_out = BUF_SIZE;
+          strm.next_out = out;
+          ret = inflate(&strm, Z_NO_FLUSH);
+          assert(ret != Z_STREAM_ERROR); /* state not clobbered */
+          switch (ret) {
+          case Z_NEED_DICT:
+            ret = Z_DATA_ERROR; /* and fall through */
+          case Z_DATA_ERROR:
+          case Z_MEM_ERROR:
+            (void)inflateEnd(&strm);
+          }
+          have = BUF_SIZE - strm.avail_out;
+
+          printf("%.*s", (int)have, out);
+        } while (strm.avail_out == 0);
+
+        /* done when inflate() says it's done */
+      } while (ret != Z_STREAM_END);
+
+      (void)inflateEnd(&strm);
       close(new_fd);
       exit(0);
     }
