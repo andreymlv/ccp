@@ -1,5 +1,4 @@
 #include "client.h"
-#include "lib.h"
 
 #include <arpa/inet.h>
 #include <assert.h>
@@ -8,8 +7,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 #include <zlib.h>
+
+#include "lib.h"
+
+#define clock_duration(start, stop)         \
+  (((double)(stop.tv_sec - start.tv_sec)) + \
+   ((double)(stop.tv_nsec - start.tv_nsec)) / 1000000000)
 
 void init_client(client *client, const char *file, const char *ip,
                  const char *port) {
@@ -82,7 +88,7 @@ void open_read_send_client(client *client) {
             sizeof s);
   printf("client: connecting to %s\n", s);
 
-  freeaddrinfo(servinfo); // all done with this structure
+  freeaddrinfo(servinfo);  // all done with this structure
 
   if ((client->fd = open(client->file, O_RDONLY)) == -1) {
     perror("open");
@@ -101,10 +107,17 @@ void open_read_send_client(client *client) {
   strm.zalloc = Z_NULL;
   strm.zfree = Z_NULL;
   strm.opaque = Z_NULL;
-  ret = deflateInit(&strm, Z_DEFAULT_COMPRESSION);
+  ret = deflateInit(&strm, client->level);
   if (ret != Z_OK) {
     perror("deflateInit");
   }
+
+  struct timespec start, stop;
+
+  memset(&start, 0, sizeof(start));
+  memset(&stop, 0, sizeof(stop));
+
+  clock_gettime(CLOCK_REALTIME, &start);
 
   /* compress until end of file */
   do {
@@ -128,7 +141,7 @@ void open_read_send_client(client *client) {
       while ((sended = send(sockfd, out, have, 0)) < have) {
         have -= sended;
       }
-      printf("sended %ld bytes.\n", sended);
+      // printf("sended %ld bytes.\n", sended);
     } while (strm.avail_out == 0);
     assert(strm.avail_in == 0); /* all input will be used */
 
@@ -138,6 +151,10 @@ void open_read_send_client(client *client) {
 
   /* clean up and return */
   (void)deflateEnd(&strm);
+
+  clock_gettime(CLOCK_REALTIME, &stop);
+
+  printf("send with %f\n", clock_duration(start, stop));
 
 exit:
   close(sockfd);

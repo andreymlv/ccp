@@ -1,12 +1,13 @@
 [
   {
     "arguments": [
-      "/sbin/cc",
+      "/usr/bin/cc",
       "-c",
-      "-g",
       "-std=c99",
+      "-pedantic",
       "-Wall",
-      "-O0",
+      "-Wno-deprecated-declarations",
+      "-Os",
       "-D_DEFAULT_SOURCE",
       "-D_BSD_SOURCE",
       "-D_XOPEN_SOURCE=700L",
@@ -18,12 +19,13 @@
   },
   {
     "arguments": [
-      "/sbin/cc",
+      "/usr/bin/cc",
       "-c",
-      "-g",
       "-std=c99",
+      "-pedantic",
       "-Wall",
-      "-O0",
+      "-Wno-deprecated-declarations",
+      "-Os",
       "-D_DEFAULT_SOURCE",
       "-D_BSD_SOURCE",
       "-D_XOPEN_SOURCE=700L",
@@ -35,12 +37,13 @@
   },
   {
     "arguments": [
-      "/sbin/cc",
+      "/usr/bin/cc",
       "-c",
-      "-g",
       "-std=c99",
+      "-pedantic",
       "-Wall",
-      "-O0",
+      "-Wno-deprecated-declarations",
+      "-Os",
       "-D_DEFAULT_SOURCE",
       "-D_BSD_SOURCE",
       "-D_XOPEN_SOURCE=700L",
@@ -52,12 +55,13 @@
   },
   {
     "arguments": [
-      "/sbin/cc",
+      "/usr/bin/cc",
       "-c",
-      "-g",
       "-std=c99",
+      "-pedantic",
       "-Wall",
-      "-O0",
+      "-Wno-deprecated-declarations",
+      "-Os",
       "-D_DEFAULT_SOURCE",
       "-D_BSD_SOURCE",
       "-D_XOPEN_SOURCE=700L",

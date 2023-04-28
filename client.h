@@ -6,6 +6,7 @@ typedef struct {
   int fd;
   char *ip;
   char *port;
+  int level;
 } client;
 
 void init_client(client *client, const char *file, const char *ip,
